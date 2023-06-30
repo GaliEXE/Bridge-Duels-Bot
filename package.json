@@ -1,0 +1,21 @@
+{
+  "name": "bridge-duels-bot",
+  "version": "0.0.1 BETA",
+  "description": "",
+  "main": "src/bot.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "keywords": [],
+  "author": "Gali Studios",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/rest": "^1.7.1",
+    "chalk": "^4.1.2",
+    "discord-api-types": "^0.37.46",
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.3.1",
+    "isomorphic-fetch": "^3.0.0",
+    "node-fetch": "^3.3.1"
+  }
+}
