@@ -5,7 +5,7 @@ module.exports = {
     once: true,
     async execute(client) {
         const customStatus = {
-            text: 'Under Development',
+            text: 'Version 1.0',
             details: 'Working on cool features!'
         };
 
