@@ -1,7 +1,7 @@
 const fetch = require('isomorphic-fetch');
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 require('dotenv').config();
-const { api } = process.env
+const { api } = process.env;
 
 const roleData = [
   [0, '1124394044873785424', 5067615],      // No Rank
@@ -14,21 +14,21 @@ const roleData = [
   [1400, '1032802060422348912', 43520],     // Master III
   [1600, '1032802107344027660', 43520],     // Master IV
   [1800, '1032802189686620251', 43520],     // Master V
-  [2000, '1032802263858675773', 16737792],  // Legend
-  [2600, '1032802332251013120', 16737792],  // Legend II
-  [3200, '1032802466024128544', 16737792],  // Legend III
-  [3800, '1032802538539454596', 16737792],  // Legend IV
-  [4400, '1032802630621220884', 16737792],  // Legend V
-  [5000, '1032802733167751298', 16711680],  // Grandmaster
-  [6000, '1032802855184236564', 16711680],  // Grandmaster II
-  [7000, '1032802979939635260', 16711680],  // Grandmaster III
-  [8000, '1032802968417878097', 16711680],  // Grandmaster IV
-  [9000, '1032803146998763551', 16711680],  // Grandmaster V
-  [10000, '1032803215265255484', 16711935], // Godlike
-  [13000, '1032803288774615050', 16711935], // Godlike II
-  [16000, '1032803423982211142', 16711935], // Godlike III
-  [29000, '1032803530752393297', 16711935], // Godlike IV
-  [22000, '1032803624386043935', 16711935], // Godlike V
+  [2000, '1032802263858675773', 11141120],  // Legend
+  [2600, '1032802332251013120', 11141120],  // Legend II
+  [3200, '1032802466024128544', 11141120],  // Legend III
+  [3800, '1032802538539454596', 11141120],  // Legend IV
+  [4400, '1032802630621220884', 11141120],  // Legend V
+  [5000, '1032802733167751298', 16777045],  // Grandmaster
+  [6000, '1032802855184236564', 16777045],  // Grandmaster II
+  [7000, '1032802979939635260', 16777045],  // Grandmaster III
+  [8000, '1032802968417878097', 16777045],  // Grandmaster IV
+  [9000, '1032803146998763551', 16777045],  // Grandmaster V
+  [10000, '1032803215265255484', 11141290], // Godlike
+  [13000, '1032803288774615050', 11141290], // Godlike II
+  [16000, '1032803423982211142', 11141290], // Godlike III
+  [29000, '1032803530752393297', 11141290], // Godlike IV
+  [22000, '1032803624386043935', 11141290], // Godlike V
   [25000, '1032803767499886712', 8454143],  // Celestial
   [30000, '1032804102566068234', 8454143],  // Celestial II
   [35000, '1032804242479652884', 8454143],  // Celestial III
@@ -37,6 +37,7 @@ const roleData = [
   [500000, '1032804513482018838', 8454016], // Divine
   [100000, '1123709890553192499', 3090682], // Ascended
 ];
+
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -56,6 +57,7 @@ module.exports = {
       }
 
       const mcIdReturn = mcId.id;
+      const mcUsername = mcId.name;
       const hypixelRequest = await fetch(`https://api.hypixel.net/player?key=${api}&uuid=${mcIdReturn}`)
       const hypixelStats = await hypixelRequest.json();
       if (!hypixelStats || !hypixelStats.player || !hypixelStats.player.achievements || !hypixelStats.player.achievements.duels_bridge_wins) {
@@ -64,7 +66,12 @@ module.exports = {
       }
 
       //Remove Below to Disable Discord Auth!
-
+      const hypixelDiscord = hypixelStats.player.socialMedia?.links?.DISCORD;
+      const discordUsername = interaction.user.username;
+      if (!hypixelDiscord || hypixelDiscord !== discordUsername) {
+        await interaction.reply('Your Discord account is not linked to your Hypixel account, or you have not updated your discord username on Hypixel!');
+        return;
+      }
       //Remove Above to Disable Discord Auth!
 
       const bridgeWins = hypixelStats.player.achievements.duels_bridge_wins;
@@ -89,17 +96,21 @@ module.exports = {
         roleNotif = 'No Roles Applied!'
       }
 
+      const embedMessage = `Username: **${mcUsername}**\nBridge Wins: **${bridgeWins}**\nRank: <@&${roleId}>\n\n**__${roleNotif}__**`;
       const skinUrl = `https://crafatar.com/renders/body/${mcIdReturn}?overlay=true&scale=10`;
-      const embed = {
-        title: 'Linking Roles!',
-        description: `Username: ${interaction.options.getString('username')}\nBridge Wins: ${bridgeWins}\nRank: <@&${roleId}> \n${roleNotif}`,
-        thumbnail: { url: skinUrl },
-        fields: [],
-        color: roleColor,
-      };
+      const success = new EmbedBuilder()
+        .setTitle("Linking Roles!")
+        .setDescription(embedMessage)
+        .setThumbnail(skinUrl)
+        .setColor(roleColor)
+        .setFooter({
+          text: "Created by Gali7 for the Bridge Duels Community",
+          iconURL: "https://raw.githubusercontent.com/GaliEXE/Bridge-Duels-Bot/main/ChannelLogo.png",
+        })
+        .setTimestamp();
 
       try {
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [success] });
       } catch (error) {
         console.error('An error occurred while replying to the interaction:', error);
       }
@@ -107,7 +118,8 @@ module.exports = {
     } catch (error) {
       console.error('An Error Occurred. Please Try Again!', error);
     }
-  }
+  },
+  roleData,
 };
 
 async function removeRoles(guild, roleIdsToRemove, member) {
